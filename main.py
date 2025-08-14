@@ -47,7 +47,7 @@ def get_roller_revenue(startDate: str,
     response = requests.get(url, headers=headers)
     return response.json
 
-def run_pipeline()
+def run_pipeline():
     json_data = get_roller_revenue(startDate="2024-08-01", endDate="2024-08-02")
     return json_data
 
