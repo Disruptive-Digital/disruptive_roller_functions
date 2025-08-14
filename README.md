@@ -4,3 +4,11 @@ This repo houses the GCP cloud run functions code. Currently we ingest the from 
 
 - Roller Products
 - Roller Revenue
+
+## Local Dev
+
+To test the files alone:
+
+`source ./venv/bin/activate`
+
+`python3 functions.py`
