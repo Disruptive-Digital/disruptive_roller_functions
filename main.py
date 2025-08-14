@@ -1,11 +1,23 @@
 import logging
 from flask import Flask, request
-from functions import run_pipeline
+from functions import get_roller_revenue
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
+def run_pipeline():
+
+    startDate = request.args.get('startDate')
+    endDate = request.args.get('endDate')
+
+    data_response = get_roller_revenue(startDate=startDate, endDate=endDate)
+
+    # json_data = data_response.json()
+
+    return data_response
+
 
 # Cloud Run endpoints
 @app.route('/', methods=['GET', 'POST'])
