@@ -1,1 +1,4 @@
-requests==2.32.4
+requests==2.31.0
+google-cloud-bigquery==3.13.0
+flask==2.3.3
+gunicorn==21.2.0

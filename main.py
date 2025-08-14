@@ -1,6 +1,16 @@
-import requests
-import json
 import os
+import json
+import logging
+import requests
+from datetime import datetime
+from google.cloud import bigquery
+from flask import Flask, request, jsonify
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+
 
 def get_roller_auth_token() -> str:
 
@@ -37,8 +47,26 @@ def get_roller_revenue(startDate: str,
     response = requests.get(url, headers=headers)
     return response.json
 
-if __name__ == '__main__':
-
+def run_pipeline()
     json_data = get_roller_revenue(startDate="2024-08-01", endDate="2024-08-02")
-    print(json_data)
+    return json_data
+
+# Cloud Run endpoints
+@app.route('/', methods=['GET', 'POST'])
+def main():
+    """Main endpoint for Cloud Run"""
+    result = run_pipeline()
     
+    if result['status'] == 'success':
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy'}), 200
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)
