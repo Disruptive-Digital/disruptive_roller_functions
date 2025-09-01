@@ -16,7 +16,7 @@ def run_pipeline():
 
     location = request.headers.get('location')
 
-    print(f"Running for location {arlington}: {startDate} to {endDate}")
+    print(f"Running for location {location}: {startDate} to {endDate}")
 
     df_list = []
     current_page = 1
