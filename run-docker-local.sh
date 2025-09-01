@@ -9,3 +9,7 @@ echo "Starting container..."
 docker run -p 8080:8080 \
   --name api-to-bigquery-container \
   api-to-bigquery
+
+# Remove container after exit
+echo "Cleaning up..."
+docker rm -f api-to-bigquery-container
