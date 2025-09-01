@@ -4,3 +4,4 @@ flask==2.3.3
 gunicorn==21.2.0
 pandas==2.3.2
 python-dotenv==1.1.1
+pyarrow==21.0.0
