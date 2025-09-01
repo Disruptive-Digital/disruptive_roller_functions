@@ -1,5 +1,5 @@
 from flask import Flask, request
-from functions import get_roller_revenue
+from functions import get_roller_revenue, merge_to_bigquery
 import pandas as pd
 from datetime import date
 

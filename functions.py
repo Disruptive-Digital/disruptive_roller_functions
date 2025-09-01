@@ -29,7 +29,7 @@ def get_roller_auth_token(location: str) -> str:
 def get_roller_revenue(startDate: str, 
                        endDate: str, 
                        pageNumber: int = 0,
-                       location:str
+                       location: str
                     ) -> str:
 
     if pageNumber > 0:
