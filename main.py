@@ -16,6 +16,8 @@ def run_pipeline():
 
     location = request.headers.get('location')
 
+    print(f"Running for location {arlington}: {startDate} to {endDate}")
+
     df_list = []
     current_page = 1
     total_pages = current_page + 1
@@ -37,6 +39,7 @@ def run_pipeline():
 
     # Combine all into one DataFrame
     final_df = pd.concat(df_list, ignore_index=True)
+    print(f"Loading records: {final_df.shape}")
 
     project_name = "earnest-dogfish-465412-p1"
     table_name = "revenue"
