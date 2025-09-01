@@ -50,7 +50,7 @@ def merge_to_bigquery(df: pd.DataFrame,
                       dataset_name: str,
                       table_name: str) -> None:
 
-    client = bigquery.Client()
+    client = bigquery.Client.from_service_account_json(os.getenv("service_account_json"))
     target_table = f"{project_name}.{dataset_name}.{table_name}"
     staging_table = f"{project_name}.{dataset_name}.staging_{table_name}"
 
