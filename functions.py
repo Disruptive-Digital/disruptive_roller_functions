@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_roller_auth_token(location:str) -> str:
+def get_roller_auth_token(location: str) -> str:
 
     url = "https://api.roller.app/token"
 

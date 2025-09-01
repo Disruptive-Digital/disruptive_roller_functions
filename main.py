@@ -1,12 +1,7 @@
-import logging
 from flask import Flask, request
 from functions import get_roller_revenue
 import pandas as pd
 from datetime import date
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
