@@ -62,6 +62,9 @@ def merge_to_bigquery(df: pd.DataFrame,
     USING `{staging_table}` S
     ON T.bookingPaymentId = S.items.bookingPaymentId 
        AND T.bookingItemId = S.items.bookingItemId
+       AND CAST(T.recordDate AS STRING) = S.items.recordDate
+       AND T.accountsReceivable = S.items.accountsReceivable
+       AND T.deferredRevenue = S.items.deferredRevenue
        AND DATE(T.transactionDate) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
     
     WHEN MATCHED THEN
