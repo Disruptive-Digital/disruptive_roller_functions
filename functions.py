@@ -59,86 +59,85 @@ def merge_to_bigquery(df: pd.DataFrame,
 
     merge_query = f"""
     MERGE `{target_table}` T
-   USING (
-       SELECT *
-        FROM (
-          SELECT *,
-            ROW_NUMBER() OVER (
-              PARTITION BY
-                items.bookingPaymentId,
-                items.bookingItemId,
-                items.recordDate,
-                CAST(items.accountsReceivable AS STRING),
-                CAST(items.deferredRevenue AS STRING)
-              ORDER BY
-                items.recordDate DESC 
-            ) AS rn
-          FROM `{staging_table}`
+    USING (
+           SELECT *
+            FROM (
+              SELECT *,
+                ROW_NUMBER() OVER (
+                  PARTITION BY
+                    items.bookingPaymentId,
+                    items.bookingItemId,
+                    items.recordDate,
+                    CAST(items.accountsReceivable AS STRING),
+                    CAST(items.deferredRevenue AS STRING)
+                  ORDER BY
+                    items.recordDate DESC 
+                ) AS rn
+              FROM `{staging_table}`
+            )
+            WHERE rn = 1
+        ) S
+        ON T.bookingPaymentId = S.items.bookingPaymentId
+          AND T.bookingItemId = S.items.bookingItemId
+          AND T.recordDate = CAST(S.items.recordDate AS TIMESTAMP)
+          AND T.accountsReceivable = S.items.accountsReceivable
+          AND T.deferredRevenue = S.items.deferredRevenue
+        
+        WHEN MATCHED THEN
+        UPDATE SET
+            bookingPaymentId = S.items.bookingPaymentId,
+            bookingReference = S.items.bookingReference,
+            packageBookingItemId = S.items.packageBookingItemId,
+            customerId = S.items.customerId,
+            productId = S.items.productId,
+            productType = S.items.productType,
+            transactionDate = CAST(S.items.transactionDate AS TIMESTAMP),
+            recordDate = CAST(S.items.recordDate AS TIMESTAMP),
+            entryType = S.items.entryType,
+            transactionLocation = S.items.transactionLocation,
+            bookingLocation = S.items.bookingLocation,
+            paymentType = S.items.paymentType,
+            externalPaymentReference = S.items.externalPaymentReference,
+            unitCost = S.items.unitCost,
+            transactionValue = S.items.transactionValue,
+            taxPercent = S.items.taxPercent,
+            feeTaxPercent = S.items.feeTaxPercent,
+            fundsReceived = S.items.fundsReceived,
+            taxOnFundsReceived = S.items.taxOnFundsReceived,
+            voucherFundsReceived = S.items.voucherFundsReceived,
+            discount = S.items.discount,
+            feeRevenue = S.items.feeRevenue,
+            taxOnFees = S.items.taxOnFees,
+            deferredRevenue = S.items.deferredRevenue,
+            deferredRevenueGiftCards = S.items.deferredRevenueGiftCards,
+            manualGiftCardAdjustment = S.items.manualGiftCardAdjustment,
+            deferredRevenueOther = S.items.deferredRevenueOther,
+            accountsReceivable = S.items.accountsReceivable,
+            netRevenue = S.items.netRevenue,
+            taxPayable = S.items.taxPayable,
+            recognisedDiscount = S.items.recognisedDiscount,
+            ticketQuantity = S.items.ticketQuantity,
+            redeemedQuantity = S.items.redeemedQuantity,
+            expiredQuantity = S.items.expiredQuantity
+        
+        WHEN NOT MATCHED THEN
+        INSERT (
+            bookingPaymentId, bookingReference, packageBookingItemId, customerId, productId, productType, bookingItemId,
+            transactionDate, recordDate, entryType, transactionLocation, bookingLocation, paymentType, externalPaymentReference,
+            unitCost, transactionValue, taxPercent, feeTaxPercent, fundsReceived, taxOnFundsReceived, voucherFundsReceived,
+            discount, feeRevenue, taxOnFees, deferredRevenue, deferredRevenueGiftCards, manualGiftCardAdjustment,
+            deferredRevenueOther, accountsReceivable, netRevenue, taxPayable, recognisedDiscount, ticketQuantity,
+            redeemedQuantity, expiredQuantity
         )
-        WHERE rn = 1
-    ) S
-    ON T.bookingPaymentId = S.items.bookingPaymentId 
-       AND T.bookingItemId = S.items.bookingItemId
-       AND CAST(T.recordDate AS STRING) = S.items.recordDate
-       AND T.accountsReceivable = S.items.accountsReceivable
-       AND T.deferredRevenue = S.items.deferredRevenue
-       AND DATE(T.transactionDate) >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+        VALUES (
+            S.items.bookingPaymentId, S.items.bookingReference, S.items.packageBookingItemId, S.items.customerId, S.items.productId, S.items.productType, S.items.bookingItemId,
+            CAST(S.items.transactionDate AS TIMESTAMP), CAST(S.items.recordDate AS TIMESTAMP), S.items.entryType, S.items.transactionLocation, S.items.bookingLocation, S.items.paymentType, S.items.externalPaymentReference,
+            S.items.unitCost, S.items.transactionValue, S.items.taxPercent, S.items.feeTaxPercent, S.items.fundsReceived, S.items.taxOnFundsReceived, S.items.voucherFundsReceived,
+            S.items.discount, S.items.feeRevenue, S.items.taxOnFees, S.items.deferredRevenue, S.items.deferredRevenueGiftCards, S.items.manualGiftCardAdjustment,
+            S.items.deferredRevenueOther, S.items.accountsReceivable, S.items.netRevenue, S.items.taxPayable, S.items.recognisedDiscount, S.items.ticketQuantity,
+            S.items.redeemedQuantity, S.items.expiredQuantity
     
-    WHEN MATCHED THEN
-    UPDATE SET
-        bookingPaymentId = S.items.bookingPaymentId,
-        bookingReference = S.items.bookingReference,
-        packageBookingItemId = S.items.packageBookingItemId,
-        customerId = S.items.customerId,
-        productId = S.items.productId,
-        productType = S.items.productType,
-        transactionDate = CAST(S.items.transactionDate AS TIMESTAMP),
-        recordDate = CAST(S.items.recordDate AS TIMESTAMP),
-        entryType = S.items.entryType,
-        transactionLocation = S.items.transactionLocation,
-        bookingLocation = S.items.bookingLocation,
-        paymentType = S.items.paymentType,
-        externalPaymentReference = S.items.externalPaymentReference,
-        unitCost = S.items.unitCost,
-        transactionValue = S.items.transactionValue,
-        taxPercent = S.items.taxPercent,
-        feeTaxPercent = S.items.feeTaxPercent,
-        fundsReceived = S.items.fundsReceived,
-        taxOnFundsReceived = S.items.taxOnFundsReceived,
-        voucherFundsReceived = S.items.voucherFundsReceived,
-        discount = S.items.discount,
-        feeRevenue = S.items.feeRevenue,
-        taxOnFees = S.items.taxOnFees,
-        deferredRevenue = S.items.deferredRevenue,
-        deferredRevenueGiftCards = S.items.deferredRevenueGiftCards,
-        manualGiftCardAdjustment = S.items.manualGiftCardAdjustment,
-        deferredRevenueOther = S.items.deferredRevenueOther,
-        accountsReceivable = S.items.accountsReceivable,
-        netRevenue = S.items.netRevenue,
-        taxPayable = S.items.taxPayable,
-        recognisedDiscount = S.items.recognisedDiscount,
-        ticketQuantity = S.items.ticketQuantity,
-        redeemedQuantity = S.items.redeemedQuantity,
-        expiredQuantity = S.items.expiredQuantity
-    
-    WHEN NOT MATCHED THEN
-    INSERT (
-        bookingPaymentId, bookingReference, packageBookingItemId, customerId, productId, productType, bookingItemId,
-        transactionDate, recordDate, entryType, transactionLocation, bookingLocation, paymentType, externalPaymentReference,
-        unitCost, transactionValue, taxPercent, feeTaxPercent, fundsReceived, taxOnFundsReceived, voucherFundsReceived,
-        discount, feeRevenue, taxOnFees, deferredRevenue, deferredRevenueGiftCards, manualGiftCardAdjustment,
-        deferredRevenueOther, accountsReceivable, netRevenue, taxPayable, recognisedDiscount, ticketQuantity,
-        redeemedQuantity, expiredQuantity
-    )
-    VALUES (
-        S.items.bookingPaymentId, S.items.bookingReference, S.items.packageBookingItemId, S.items.customerId, S.items.productId, S.items.productType, S.items.bookingItemId,
-        CAST(S.items.transactionDate AS TIMESTAMP), CAST(S.items.recordDate AS TIMESTAMP), S.items.entryType, S.items.transactionLocation, S.items.bookingLocation, S.items.paymentType, S.items.externalPaymentReference,
-        S.items.unitCost, S.items.transactionValue, S.items.taxPercent, S.items.feeTaxPercent, S.items.fundsReceived, S.items.taxOnFundsReceived, S.items.voucherFundsReceived,
-        S.items.discount, S.items.feeRevenue, S.items.taxOnFees, S.items.deferredRevenue, S.items.deferredRevenueGiftCards, S.items.manualGiftCardAdjustment,
-        S.items.deferredRevenueOther, S.items.accountsReceivable, S.items.netRevenue, S.items.taxPayable, S.items.recognisedDiscount, S.items.ticketQuantity,
-        S.items.redeemedQuantity, S.items.expiredQuantity
-
-    );
+        );
 
     """
     client.query(merge_query).result()
