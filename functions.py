@@ -59,7 +59,24 @@ def merge_to_bigquery(df: pd.DataFrame,
 
     merge_query = f"""
     MERGE `{target_table}` T
-    USING `{staging_table}` S
+   USING (
+       SELECT *
+        FROM (
+          SELECT *,
+            ROW_NUMBER() OVER (
+              PARTITION BY
+                items.bookingPaymentId,
+                items.bookingItemId,
+                items.recordDate,
+                CAST(items.accountsReceivable AS STRING),
+                CAST(items.deferredRevenue AS STRING)
+              ORDER BY
+                items.recordDate DESC 
+            ) AS rn
+          FROM `{staging_table}`
+        )
+        WHERE rn = 1
+    ) S
     ON T.bookingPaymentId = S.items.bookingPaymentId 
        AND T.bookingItemId = S.items.bookingItemId
        AND CAST(T.recordDate AS STRING) = S.items.recordDate
