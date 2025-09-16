@@ -59,7 +59,7 @@ def main():
 
     result = run_pipeline()
     
-    if result.status_code == 'success':
+    if result.status_code == 200:
         return result.json(), 200
     else:
         return result.json(), 500
